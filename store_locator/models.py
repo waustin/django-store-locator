@@ -17,7 +17,7 @@ class Location(models.Model):
 
     address = models.CharField(max_length=150)
     address_2 = models.CharField(max_length=150, blank=True)
-    city = models.CharField(max_length=100)
+    city = models.CharField(max_length=100, db_index=True)
     state = models.CharField(max_length=10, db_index=True)
     zip_code = models.CharField(max_length=5, db_index=True)
 
