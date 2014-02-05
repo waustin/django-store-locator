@@ -91,9 +91,12 @@ INSTALLED_APPS += (
     'django_nose',
 )
 
+# Turn off south during test
+SOUTH_TESTS_MIGRATE = False
+
 # Use nose to run all tests
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-OSE_ARGS = [
+NOSE_ARGS = [
     '--with-coverage',
     '--cover-package=store_locator',
 ]

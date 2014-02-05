@@ -90,4 +90,51 @@ class LocationViewTest(LocationTestBase):
         self.assertTemplateUsed(response, 'store_locator/location_detail.html')
         self.assertEqual(response.context['location'], self.l_1)
 
+class LocationRadiusSearchTest(LocationTestBase):
+    def test_radius_search(self):
+        search_point = '34.74759,-92.271053'
+        search_distance = '5'
+        response = self.client.get(reverse('store_location_find_by_point'),
+                                   {'location':search_point,
+                                    'distance':search_distance})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'store_locator/location_search.html')
+        self.assertEqual(response.context['distance'], int(search_distance))
+        self.assertEqual(response.context['search_spot'], search_point)
+        self.assertQuerysetEqual(response.context['location_list'],
+                                 [repr(self.l_1), repr(self.l_2), repr(self.l_3)])
+
+
+    def test_radius_search_invalid_distance(self):
+        search_point = '34.74759,-92.271053'
+        response = self.client.get(reverse('store_location_find_by_point'),
+                                   {'location':search_point,
+                                    'distance':'-2'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['distance'], 20)
+
+        response = self.client.get(reverse('store_location_find_by_point'),
+                                   {'location':search_point,
+                                    'distance':'0'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['distance'], 20)
+
+        response = self.client.get(reverse('store_location_find_by_point'),
+                                   {'location':search_point,
+                                    'distance':'101'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['distance'], 20)
+
+        response = self.client.get(reverse('store_location_find_by_point'),
+                                   {'location':search_point})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['distance'], 20)
+
+        response = self.client.get(reverse('store_location_find_by_point'),
+                                   {'location':search_point,
+                                    'distance':'asdfadfadsf'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['distance'], 20)
+
+
 
