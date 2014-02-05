@@ -27,10 +27,6 @@ class Location(models.Model):
 
     objects = models.GeoManager()
 
-    def display_address(self):
-        return "{0} {1} {2}, {3} {4}".format(self.address, self.address_2,
-                                             self.city, self.state, self.zip_code)
-
     def __unicode__(self):
         return "{0} :: {1}, {2}".format(self.name, self.city, self.state)
 
