@@ -1,7 +1,7 @@
 from django.contrib.gis.geos import Point
 from django.views.generic import ListView, DetailView
 
-from .models import Location
+from .models import Location, ZipCodeLocation
 
 GOOGLE_MAPS_PROJECTION = 900913
 METER_PER_MILE_BUFFER = 2172.334
@@ -69,6 +69,33 @@ class LocationRadiusSearch(ListView):
         context['search_spot'] = self.search_spot
         return context
 
+
+class LocationsByZipCode(LocationRadiusSearch):
+    def parse_zipcode(self):
+        zipcode = self.request.GET.get('zip', None)
+        return zipcode
+
+    def get_zipcode_coord(self, zipcode):
+        try:
+            z = ZipCodeLocation.objects.get(zip_code=zipcode)
+            return z.location
+        except ZipCodeLocation.DoesNotExist:
+            return None
+
+    def get_queryset(self):
+        self.selected_zipcode = self.parse_zipcode()
+        self.distance = self.parse_distance()
+
+        self.search_spot = self.selected_zipcode
+
+        search_point = self.get_zipcode_coord(self.selected_zipcode)
+        print "SEL ZIP: ", self.selected_zipcode
+        print "SP:  ", search_point
+        if search_point is None:
+            return Location.objects.none()
+
+        location_qs = Location.objects.all()
+        return self.radius_search(location_qs, search_point, self.distance)
 
 class LocationsByState(ListView):
     def get_queryset(self):

@@ -34,7 +34,7 @@ class ModelTestCase(TestCase):
 
 class LocationTestBase(TestCase):
     def setUp(self):
-        self.l_1 = Location.objects.create(name='Location 1',
+        self.l_1 = Location.objects.create(name='Location 1 - LR',
                                            address='addr',
                                            address_2='addr2',
                                            city='city 4',
@@ -42,7 +42,7 @@ class LocationTestBase(TestCase):
                                            zip_code='90210',
                                            location=SAMPLE_POINT_1,
                                            description='lorem ipsum')
-        self.l_2 = Location.objects.create(name='Location 2',
+        self.l_2 = Location.objects.create(name='Location 2 - LR',
                                            address='addr',
                                            address_2='addr2',
                                            city='city 2',
@@ -50,7 +50,7 @@ class LocationTestBase(TestCase):
                                            zip_code='90210',
                                            location=SAMPLE_POINT_2,
                                            description='lorem ipsum')
-        self.l_3 = Location.objects.create(name='Location 4',
+        self.l_3 = Location.objects.create(name='Location 3 - WLR',
                                            address='addr',
                                            address_2='addr2',
                                            city='city 3',
@@ -58,13 +58,22 @@ class LocationTestBase(TestCase):
                                            zip_code='90210',
                                            location=SAMPLE_POINT_3,
                                            description='lorem ipsum')
-        self.l_4 = Location.objects.create(name='Location 4',
+        self.l_4 = Location.objects.create(name='Location 4 - DD',
                                            address='addr',
                                            address_2='addr2',
                                            city='city 1',
                                            state='AR',
                                            zip_code='90210',
                                            location=SAMPLE_POINT_4,
+                                           description='lorem ipsum')
+
+        self.l_5 = Location.objects.create(name='Location 5 - HS',
+                                           address='addr',
+                                           address_2='addr2',
+                                           city='city 5',
+                                           state='AR',
+                                           zip_code='90210',
+                                           location=SAMPLE_POINT_5,
                                            description='lorem ipsum')
 
 
@@ -75,7 +84,8 @@ class LocationViewTest(LocationTestBase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'store_locator/location_list.html')
         self.assertQuerysetEqual(response.context['location_list'],
-                                 [repr(self.l_4), repr(self.l_2), repr(self.l_3), repr(self.l_1)])
+                                 [repr(self.l_4), repr(self.l_2), repr(self.l_3), repr(self.l_1),
+                                  repr(self.l_5)])
 
     def test_location_by_state_view_unknown_state(self):
         response = self.client.get(reverse('store_locator_locations_by_state',
@@ -177,3 +187,48 @@ class LocationRadiusSearchTest(LocationTestBase):
         self.assertEqual(response.status_code, 200)
         self.assertQuerysetEqual(
             response.context['location_list'], Location.objects.none())
+
+
+class LocationZipSearchTest(LocationTestBase):
+    def setUp(self):
+        super(LocationZipSearchTest, self).setUp()
+
+        ZipCodeLocation.objects.create(zip_code='72201',
+                                       location='Point(-92.27987 34.745692)')
+
+    def test_zip_search(self):
+        search_zip = '72201'
+        search_distance = '5'
+        response = self.client.get(reverse('store_location_find_by_zip'),
+                                   {'zip': search_zip,
+                                    'distance': search_distance})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'store_locator/location_search.html')
+        self.assertEqual(response.context['distance'], int(search_distance))
+        self.assertEqual(response.context['search_spot'], search_zip)
+        self.assertQuerysetEqual(response.context['location_list'],
+                                 [repr(self.l_2), repr(self.l_1)])
+
+    def test_invalid_zip(self):
+        response = self.client.get(reverse('store_location_find_by_zip'),
+                                   {'zip': 'asfasdf',
+                                    'distance': '5'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'store_locator/location_search.html')
+        self.assertQuerysetEqual(response.context['location_list'],
+                                 Location.objects.none())
+
+        response = self.client.get(reverse('store_location_find_by_zip'),
+                                   {'zip': '',
+                                    'distance': '5'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'store_locator/location_search.html')
+        self.assertQuerysetEqual(response.context['location_list'],
+                                 Location.objects.none())
+
+        response = self.client.get(reverse('store_location_find_by_zip'),
+                                   {'distance': '5'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'store_locator/location_search.html')
+        self.assertQuerysetEqual(response.context['location_list'],
+                                 Location.objects.none())
