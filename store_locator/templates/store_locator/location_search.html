@@ -3,6 +3,19 @@
 
 {% block content %}
 	<h1>Find Locations</h1>
+	
+	<form action="{% url "store_location_find_by_zip" %}" method="GET">
+		<div>
+		<label for="zip">Zip Code</label>
+		<input type="text" name="zip" id="zip" />
+		</div>
+		<div>
+		<label for="distance">Distance in miles (max 100)</label>
+		<input type="text" name="distance" id="distance"/>
+		</div>
+		<input type="submit" value="Search"/>
+	</form>
+
 	<h4>Search Radius: {{distance}}</h4>
 	<h4>Search Spot: {{search_spot}}</h4>
 
