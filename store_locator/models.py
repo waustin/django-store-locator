@@ -32,7 +32,7 @@ class Location(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('store_locator_location_detail', (), {'pk':self.id})
+        return ('store_locator_location_detail', (), {'pk': self.id})
 
     class Meta:
         ordering = ('name',)

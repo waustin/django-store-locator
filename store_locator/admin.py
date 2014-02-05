@@ -20,7 +20,7 @@ class LocationAdmin(geoadmin.OSMGeoAdmin):
     map_width = 850
     map_height = 700
 
-    list_display = ('name', 'display_address', 'state', 'zip_code')
+    list_display = ('name', 'address', 'state', 'zip_code')
     list_filter = ('state',)
     search_fields = ('name', 'address', 'city', 'state', 'zip_code')
 
