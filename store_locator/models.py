@@ -34,5 +34,9 @@ class Location(models.Model):
     def __unicode__(self):
         return "{0} :: {1}, {2}".format(self.name, self.city, self.state)
 
+    @models.permalink
+    def get_absolute_url(self):
+        return ('store_locator_location_detail', (), {'pk':self.id})
+
     class Meta:
         ordering = ('name',)

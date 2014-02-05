@@ -1,3 +1,4 @@
+from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from .models import ZipCodeLocation, Location
@@ -27,4 +28,66 @@ class ModelTestCase(TestCase):
                                     location=SAMPLE_POINT_2,
                                     description='lorem ipsum')
 
-        self.assertEqual(l.__unicode__(), "{0} :: {1}, {2}".format(l.name, l.city, l.state))
+        self.assertEqual(l.__unicode__(
+        ), "{0} :: {1}, {2}".format(l.name, l.city, l.state))
+
+
+class LocationTestBase(TestCase):
+    def setUp(self):
+        self.l_1 = Location.objects.create(name='Location 1',
+                                           address='addr',
+                                           address_2='addr2',
+                                           city='city 4',
+                                           state='AR',
+                                           zip_code='90210',
+                                           location=SAMPLE_POINT_1,
+                                           description='lorem ipsum')
+        self.l_2 = Location.objects.create(name='Location 2',
+                                           address='addr',
+                                           address_2='addr2',
+                                           city='city 2',
+                                           state='AR',
+                                           zip_code='90210',
+                                           location=SAMPLE_POINT_2,
+                                           description='lorem ipsum')
+        self.l_3 = Location.objects.create(name='Location 4',
+                                           address='addr',
+                                           address_2='addr2',
+                                           city='city 3',
+                                           state='AR',
+                                           zip_code='90210',
+                                           location=SAMPLE_POINT_3,
+                                           description='lorem ipsum')
+        self.l_4 = Location.objects.create(name='Location 4',
+                                           address='addr',
+                                           address_2='addr2',
+                                           city='city 1',
+                                           state='AR',
+                                           zip_code='90210',
+                                           location=SAMPLE_POINT_4,
+                                           description='lorem ipsum')
+
+
+class LocationViewTest(LocationTestBase):
+    def test_location_by_state_view(self):
+        response = self.client.get(reverse('store_locator_locations_by_state',
+                                           kwargs={'state': 'AR'}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'store_locator/location_list.html')
+        self.assertQuerysetEqual(response.context['location_list'],
+                                 [repr(self.l_4), repr(self.l_2), repr(self.l_3), repr(self.l_1)])
+
+    def test_location_by_state_view_unknown_state(self):
+        response = self.client.get(reverse('store_locator_locations_by_state',
+                                           kwargs={'state': 'BLAH'}))
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerysetEqual(response.context['location_list'],
+                                      Location.objects.none())
+
+    def test_location_detail_view(self):
+        response = self.client.get(self.l_1.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'store_locator/location_detail.html')
+        self.assertEqual(response.context['location'], self.l_1)
+
+
