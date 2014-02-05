@@ -89,10 +89,10 @@ class LocationsByZipCode(LocationRadiusSearch):
         self.search_spot = self.selected_zipcode
 
         search_point = self.get_zipcode_coord(self.selected_zipcode)
-        print "SEL ZIP: ", self.selected_zipcode
-        print "SP:  ", search_point
         if search_point is None:
             return Location.objects.none()
+
+        search_point.transform(GOOGLE_MAPS_PROJECTION)
 
         location_qs = Location.objects.all()
         return self.radius_search(location_qs, search_point, self.distance)
