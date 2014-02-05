@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+	<h1>Find Locations</h1>
+	<h4>Search Radius: {{distance}}</h4>
+	<h4>Search Spot: {{search_spot}}</h4>
+
+	<ul>
+	{% for l in location_list %}
+		<li>{{l.name}} - {{l.distance.mi|floatformat:3}} miles</li>
+	{% empty %}
+		<li>No locations found matching your search</li>
+	{% endfor %}
+	</ul>
+{% endblock content %}
