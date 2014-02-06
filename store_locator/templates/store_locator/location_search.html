@@ -16,6 +16,11 @@
 		<input type="submit" value="Search"/>
 	</form>
 
+	<div>
+		<h3>Find by my location: <span class="find-button" id="btnFindLocation">find stores</spans></h3>
+		<div id="LocnMsg"></div>
+	</div>
+
 	<h4>Search Radius: {{distance}}</h4>
 	<h4>Search Spot: {{search_spot}}</h4>
 
@@ -27,3 +32,32 @@
 	{% endfor %}
 	</ul>
 {% endblock content %}
+
+{% block extra_js %}
+	<script>
+		var find_url = "{% url "store_location_find_by_point" %}";
+
+		$(document).ready(function() {
+			var $find_button = $("#btnFindLocation");
+			if ("geolocation" in navigator) {
+				$find_button.click(find_location);
+			} 
+			else {
+				$find_button.text("Location lookup not available");
+			}
+
+		});
+		function find_location(evt) {
+			evt.preventDefault();
+			navigator.geolocation.getCurrentPosition(function(position) {
+				var latitude  = position.coords.latitude;
+				var longitude = position.coords.longitude;
+				window.location = find_url + '?location=' + latitude + ',' + longitude;
+
+			}, function() {
+				alert('Unable to get your location');
+			});
+		}
+	</script>
+{% endblock %}
+
